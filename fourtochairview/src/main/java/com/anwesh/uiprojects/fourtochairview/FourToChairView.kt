@@ -215,7 +215,7 @@ class FourToChairView(ctx : Context) : View(ctx) {
 
             val view : FourToChairView = FourToChairView(activity)
             activity.setContentView(view)
-            return view 
+            return view
         }
     }
 
