@@ -22,11 +22,12 @@ val foreColor : Int = Color.parseColor("#0097A7")
 val backColor : Int = Color.parseColor("#BDBDBD")
 val angleDeg : Float = 90f
 val rotationDeg : Float = 180f
+val delay : Long = 20
 
 fun Int.inverse() : Float = 1f / this
 fun Float.scaleFactor() : Float = Math.floor(this / scDiv).toFloat()
 fun Float.maxScale(i : Int, n : Int) : Float = Math.max(0f, this - i * n.inverse())
-fun Float.divideScale(i : Int, n : Int) : Float = Math.min(n.inverse(), divideScale(i, n)) * n
+fun Float.divideScale(i : Int, n : Int) : Float = Math.min(n.inverse(), maxScale(i, n)) * n
 fun Float.mirrorValue(a : Int, b : Int) : Float = (1 - scaleFactor()) * a.inverse() + scaleFactor() * b.inverse()
 fun Float.updateValue(dir : Float, a : Int, b : Int) : Float = mirrorValue(a, b) * dir * scGap
 
@@ -48,7 +49,7 @@ fun Canvas.drawFTCNode(i : Int, scale : Float, paint : Paint) {
         save()
         translate(-size / 2, -size / 2)
         rotate(angleDeg * j)
-        drawLine(0f, 0f, 0f, size * sc1.divideScale(j, lines), paint)
+        drawLine(size / 2, -size / 2, size / 2, -size / 2 + size * sc1.divideScale(j, lines), paint)
         restore()
     }
     restore()
@@ -98,7 +99,7 @@ class FourToChairView(ctx : Context) : View(ctx) {
             if (animated) {
                 cb()
                 try {
-                    Thread.sleep(50)
+                    Thread.sleep(delay)
                     view.invalidate()
                 } catch(ex : Exception) {
 
