@@ -184,5 +184,27 @@ class FourToChairView(ctx : Context) : View(ctx) {
                 curr.startUpdating(cb)
             }
         }
+
+        data class Renderer(var view : FourToChairView) {
+
+            private val animator : Animator = Animator(view)
+            private val ftc : FourToChair = FourToChair(0)
+
+            fun render(canvas : Canvas, paint : Paint) {
+                canvas.drawColor(backColor)
+                ftc.draw(canvas, paint)
+                animator.animate {
+                    ftc.update {i, scl ->
+                        animator.stop()
+                    }
+                }
+            }
+
+            fun handleTap() {
+                ftc.startUpdating {
+                    animator.start()
+                }
+            }
+        }
     }
 }
