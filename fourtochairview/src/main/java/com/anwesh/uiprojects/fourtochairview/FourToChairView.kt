@@ -57,15 +57,16 @@ fun Canvas.drawFTCNode(i : Int, scale : Float, paint : Paint) {
 class FourToChairView(ctx : Context) : View(ctx) {
 
     private val paint : Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val renderer : Renderer = Renderer(this)
 
     override fun onDraw(canvas : Canvas) {
-
+        renderer.render(canvas, paint)
     }
 
     override fun onTouchEvent(event : MotionEvent) : Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-
+                renderer.handleTap()
             }
         }
         return true
@@ -121,8 +122,8 @@ class FourToChairView(ctx : Context) : View(ctx) {
 
     data class FTCNode(var i : Int, val state : State = State()) {
 
-        private var next : FTCNode? = null
-        private var prev : FTCNode? = null
+        private var next: FTCNode? = null
+        private var prev: FTCNode? = null
 
         init {
             addNeighbor()
@@ -135,23 +136,23 @@ class FourToChairView(ctx : Context) : View(ctx) {
             }
         }
 
-        fun draw(canvas : Canvas, paint : Paint) {
+        fun draw(canvas: Canvas, paint: Paint) {
             canvas.drawFTCNode(i, state.scale, paint)
             next?.draw(canvas, paint)
         }
 
-        fun update(cb : (Int, Float) -> Unit) {
+        fun update(cb: (Int, Float) -> Unit) {
             state.update {
                 cb(i, it)
             }
         }
 
-        fun startUpdating(cb : () -> Unit) {
+        fun startUpdating(cb: () -> Unit) {
             state.startUpdating(cb)
         }
 
-        fun getNext(dir : Int, cb : () -> Unit) : FTCNode {
-            var curr : FTCNode? = prev
+        fun getNext(dir: Int, cb: () -> Unit): FTCNode {
+            var curr: FTCNode? = prev
             if (dir == 1) {
                 curr = next
             }
@@ -161,50 +162,51 @@ class FourToChairView(ctx : Context) : View(ctx) {
             cb()
             return this
         }
+    }
 
-        data class FourToChair(var i : Int) {
-            private val root : FTCNode = FTCNode(0)
-            private var curr : FTCNode = root
-            private var dir : Int = 1
+    data class FourToChair(var i : Int) {
+        private val root : FTCNode = FTCNode(0)
+        private var curr : FTCNode = root
+        private var dir : Int = 1
 
-            fun draw(canvas : Canvas, paint : Paint) {
-                root.draw(canvas, paint)
-            }
+        fun draw(canvas : Canvas, paint : Paint) {
+            root.draw(canvas, paint)
+        }
 
-            fun update(cb : (Int, Float) -> Unit) {
-                curr.update {i, scl ->
-                    curr = curr.getNext(dir) {
-                        dir *= -1
-                    }
-                    cb(i, scl)
+        fun update(cb : (Int, Float) -> Unit) {
+            curr.update {i, scl ->
+                curr = curr.getNext(dir) {
+                    dir *= -1
                 }
-            }
-
-            fun startUpdating(cb : () -> Unit) {
-                curr.startUpdating(cb)
+                cb(i, scl)
             }
         }
 
-        data class Renderer(var view : FourToChairView) {
+        fun startUpdating(cb : () -> Unit) {
+            curr.startUpdating(cb)
+        }
+    }
 
-            private val animator : Animator = Animator(view)
-            private val ftc : FourToChair = FourToChair(0)
+    data class Renderer(var view : FourToChairView) {
 
-            fun render(canvas : Canvas, paint : Paint) {
-                canvas.drawColor(backColor)
-                ftc.draw(canvas, paint)
-                animator.animate {
-                    ftc.update {i, scl ->
-                        animator.stop()
-                    }
+        private val animator : Animator = Animator(view)
+        private val ftc : FourToChair = FourToChair(0)
+
+        fun render(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(backColor)
+            ftc.draw(canvas, paint)
+            animator.animate {
+                ftc.update {i, scl ->
+                    animator.stop()
                 }
             }
+        }
 
-            fun handleTap() {
-                ftc.startUpdating {
-                    animator.start()
-                }
+        fun handleTap() {
+            ftc.startUpdating {
+                animator.start()
             }
         }
     }
+
 }
