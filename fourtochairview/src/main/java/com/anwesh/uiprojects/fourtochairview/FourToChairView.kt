@@ -209,4 +209,14 @@ class FourToChairView(ctx : Context) : View(ctx) {
         }
     }
 
+    companion object {
+
+        fun create(activity : Activity) : FourToChairView {
+
+            val view : FourToChairView = FourToChairView(activity)
+            activity.setContentView(view)
+            return view 
+        }
+    }
+
 }
